@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <title>班級問卷系統</title>
+  <style>
+    body {
+      font-family: "微軟正黑體", sans-serif;
+      background: linear-gradient(135deg, #ffe6f0, #e6f7ff);
+      color: #444;
+      text-align: center;
+      padding: 20px;
+    }
+    h1 {
+      color: #ff6fa5;
+    }
+    .hidden { display: none; }
+    .class-list, .student-list {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      margin-top: 20px;
+    }
+    .card {
+      background: #ffd6e7;
+      border-radius: 15px;
+      padding: 15px 25px;
+      margin: 10px;
+      cursor: pointer;
+      box-shadow: 2px 2px 6px rgba(0,0,0,0.2);
+      transition: transform 0.2s, background 0.2s;
+    }
+    .card:hover {
+      transform: scale(1.05);
+      background: #ffb6d9;
+    }
+    iframe {
+      width: 90%;
+      height: 600px;
+      border: none;
+      margin-top: 20px;
+      border-radius: 10px;
+      box-shadow: 0px 0px 10px rgba(0,0,0,0.2);
+    }
+    .back-btn {
+      margin-top: 20px;
+      padding: 10px 20px;
+      background: #ffb6c1;
+      border: none;
+      border-radius: 10px;
+      cursor: pointer;
+      font-size: 16px;
+    }
+    .back-btn:hover {
+      background: #ff9e8c;
+    }
+  </style>
+</head>
+<body>
+  <h1>🌸 班級問卷系統 🌸</h1>
+
+  <div id="classList" class="class-list"></div>
+  <div id="studentList" class="student-list hidden"></div>
+  <div id="formArea" class="hidden">
+    <h2 id="formTitle"></h2>
+    <iframe id="formFrame"></iframe><br>
+    <button class="back-btn" onclick="backToStudentList()">← 返回學生名單</button>
+    <button class="back-btn" onclick="backToClassList()">← 返回班級列表</button>
+  </div>
+
+  <script>
+    // 資料：班級對應學生名單
+    const studentData = {
+      "養殖一": ["何O滕", "郭O喆"],
+      "輪機一": ["施O鋒", "錢O綸"],
+      "船機一": ["辛O軒", "林O皇"],
+      "電一甲": ["彭O建"],
+      "水食一": ["李O信", "王O筑", "蔡O妍"],
+      "烘焙一": ["林O成", "張O翔", "吳O涵", "蔡O妤", "蔡O庭"],
+      "體育一": ["黃O祐"]
+    };
+
+    // Google 表單的基底 URL（不含預填參數）
+    const formBaseURL = "https://docs.google.com/forms/d/e/1FAIpQLSeRfJZfRvAmuCb3jMsinpWX7O-XBSNFvDzJpe86WyXgs3kOuw/viewform?usp=pp_url";
+
+    // entry ID：對應到你的表單裡的班級 & 學生欄位
+    const entryClass = "entry.1776778113";
+    const entryStudent = "entry.1650835019";
+
+    let currentClass = "";
+
+    // 畫出班級列表按鈕
+    function init() {
+      const classListDiv = document.getElementById("classList");
+      classListDiv.innerHTML = "";
+      for (let cls in studentData) {
+        const btn = document.createElement("div");
+        btn.innerText = cls;
+        btn.className = "card";
+        btn.onclick = () => showStudents(cls);
+        classListDiv.appendChild(btn);
+      }
+    }
+
+    // 顯示某班級的學生名單
+    function showStudents(cls) {
+      currentClass = cls;
+      document.getElementById("classList").classList.add("hidden");
+      const stDiv = document.getElementById("studentList");
+      stDiv.innerHTML = "";
+      for (let stu of studentData[cls]) {
+        const btn = document.createElement("div");
+        btn.innerText = stu;
+        btn.className = "card";
+        btn.onclick = () => openForm(cls, stu);
+        stDiv.appendChild(btn);
+      }
+      stDiv.classList.remove("hidden");
+    }
+
+    // 返回班級列表
+    function backToClassList() {
+      document.getElementById("formArea").classList.add("hidden");
+      document.getElementById("studentList").classList.add("hidden");
+      document.getElementById("classList").classList.remove("hidden");
+    }
+
+    // 返回學生名單
+    function backToStudentList() {
+      document.getElementById("formArea").classList.add("hidden");
+      document.getElementById("studentList").classList.remove("hidden");
+    }
+
+    // 打開表單（自動帶入班級與學生姓名）
+    function openForm(cls, stu) {
+      // 組參數
+      const url = `${formBaseURL}&${entryClass}=${encodeURIComponent(cls)}&${entryStudent}=${encodeURIComponent(stu)}`;
+
+      // 顯示
+      document.getElementById("studentList").classList.add("hidden");
+      const formArea = document.getElementById("formArea");
+      formArea.classList.remove("hidden");
+
+      document.getElementById("formTitle").innerText = `${cls} — ${stu} 的問卷`;
+      document.getElementById("formFrame").src = url;
+    }
+
+    // 啟動
+    window.onload = init;
+  </script>
+</body>
+</html>
